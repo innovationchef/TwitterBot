@@ -2,24 +2,23 @@ def warn(*args, **kwargs):
 	pass
 import warnings
 warnings.warn = warn
-import json
-import gzip
 import re
-import os
-import nltk
 import math
 import cPickle
+import itertools
+from numpy import c_, exp, log, inf, NaN, sqrt
 import numpy as np
 import pandas as pd
-from decimal import *
 from collections import OrderedDict
-from scipy import linalg
-from numpy import c_, exp, log, inf, NaN, sqrt
-import matplotlib.pyplot as plt
-import itertools
+import nltk
+from nltk.util import *
+from nltk.tokenize import *
 from nltk.probability import *
 import scipy
+from scipy import linalg
 from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+from decimal import *
 getcontext().prec = 25
 
 ############################################################################
@@ -49,7 +48,7 @@ class LoadCorpus:
 			for f in filenames:
 				filetext = []
 				filename = indir + '/' + f
-				with open(filename, 'rb') as file:																																																																																																																																																																																																																																																																																																																
+				with open(filename, 'rb') as file:																																																																																																																																																																																																																																																																																																															
 					file_content = file.readlines()
 					self.corpus = [line.rstrip('\n') for line in file_content]
 
@@ -213,21 +212,106 @@ class KneyserNey():
 				e += Decimal(math.log(smoothed))
 				count = count +1
 		entropy = e / Decimal(count)
-		return pow(Decimal(2.0), entropy)
+		return pow(Decimal(2.0), entropy)	
+
+############################################################################
+#################################  MAIN  ###################################
+############################################################################
+def unigram_prob_with_add1smoothing(word):
+	return Decimal((freq_unigram[word] + 1))/Decimal((len(train_corpus) + len(set(train_corpus))))
+
+def bigram_prob_with_add1smoothing(word1, word2): 
+	return Decimal((1+cfreq_bigram[word1][word2]))/Decimal((len(cfreq_bigram)+sum(cfreq_bigram[word1].values())))
+
+def trigram_prob_with_add1smoothing(word1, word2, word3): 
+	return Decimal((1+cfreq_trigram[(word1,word2)][word3]))/Decimal((len(cfreq_trigram)+sum(cfreq_trigram[(word1,word2)].values())))
+
+def perplexity(ngram):
+	e = Decimal(0.0)
+	count = 0
+	for i in range(ngram - 1, len(test_corpus)):
+		context = test_corpus[i-ngram+1:i]
+		token = test_corpus[i]
+		if len(context)==0:
+			p=unigram_prob_with_add1smoothing(token)
+		elif len(context)==1:
+			p=bigram_prob_with_add1smoothing(context[0], token)
+		elif len(context)==2:
+			p=trigram_prob_with_add1smoothing(context[0],context[1], token)
+		e += Decimal(math.log(p))
+		count += 1
+	entropy = e / Decimal(count)
+	return pow(Decimal(2.0), -entropy)
 
 if __name__ == "__main__":
 	loadcorpus = LoadCorpus(filename = 'processed_data/100.txt')
-	corpus = loadcorpus.corpus
-	for line in corpus:
-		print line
+	corpus = loadcorpus.corpus[:1000]
+	x =int(90*len(corpus)/100)
+	train = corpus[:x]
+	test = corpus[x:]
+
+	train_corpus = []
+	n_tweets = len(train)
+	for i in range(0,n_tweets):
+		line = train.pop()
+		line_tokens = word_tokenize(line.lower())
+		line_tokens = list(pad_sequence(line_tokens, 2, pad_left=True, pad_right=True, left_pad_symbol='<s>', right_pad_symbol='</s>'))
+		train_corpus.extend(line_tokens)
+
+	test_corpus = []
+	n_tweets = len(test)
+	for i in range(0,n_tweets):
+		line = test.pop()
+		line_tokens = word_tokenize(line.lower())
+		line_tokens = list(pad_sequence(line_tokens, 2, pad_left=True, pad_right=True, left_pad_symbol='<s>', right_pad_symbol='</s>'))
+		test_corpus.extend(line_tokens)
+
+	freq_unigram = nltk.FreqDist(nltk.ngrams(flatten(train),1))
+	cfreq_bigram = nltk.ConditionalFreqDist(nltk.ngrams(train_corpus,2))
+	trigrams = nltk.ngrams(train_corpus,3)
+	conditional_pairs = (((w0, w1), w2) for w0, w1, w2 in trigrams)
+	cfreq_trigram = nltk.ConditionalFreqDist(conditional_pairs)
+	print perplexity(1)
+	print perplexity(2)
+	print perplexity(3)
+
+
+# Chap 3
+
+	# import networkx as nx
+	# import matplotlib
+	# from nltk.corpus import wordnet as wn
+
+	# def traverse(graph, start, node):
+	#     graph.depth[node.name] = node.shortest_path_distance(start)
+	#     for child in node.hyponyms():
+	#         graph.add_edge(node.name, child.name) [1]
+	#         traverse(graph, start, child) [2]
+
+	# def hyponym_graph(start):
+	#     G = nx.Graph() [3]
+	#     G.depth = {}
+	#     traverse(G, start, start)
+	#     return G
+
+	# def graph_draw(graph):
+	#     nx.draw_graphviz(graph,
+	#          node_size = [16 * graph.degree(n) for n in graph],
+	#          node_color = [graph.depth[n] for n in graph],
+	#          with_labels = False)
+	#     matplotlib.pyplot.show()
+
+	#     >>> dog = wn.synset('dog.n.01')
+	# 	>>> graph = hyponym_graph(dog)
+	# 	>>> graph_draw(graph)
+
+# Chap 4
 
 
 
 
 
-	# spl =int(90*len(corpus)/100)
-	# train_corpus = corpus[:spl]
-	# test_corpus = corpus[spl:]
+
 
 	# laplace =  LaplaceSmoothing(train_corpus, test_corpus)
 	# print laplace.perplexity(ngram=2)
