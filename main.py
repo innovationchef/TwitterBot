@@ -225,10 +225,6 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
 	# spl =int(90*len(corpus)/100)
 	# train_corpus = corpus[:spl]
 	# test_corpus = corpus[spl:]
