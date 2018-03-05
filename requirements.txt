@@ -1,3 +1,13 @@
 numpy==1.12.1
 nltk
-
+lxml
+requests
+canonicaljson
+gzip
+json
+itertools
+os
+argparse
+logging
+contextlib
+sqlite3

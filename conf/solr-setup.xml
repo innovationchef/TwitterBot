@@ -1,0 +1,3 @@
+<schema>
+    <field name="sentence" type="string" indexed="true" stored="true" required="true"/>
+</schema>

@@ -1,22 +1,7 @@
-def warn(*args, **kwargs):
-    pass
-import warnings
-warnings.warn = warn
-import re
 import math
-import cPickle
-import itertools
-from numpy import c_, exp, log, inf, NaN, sqrt
-import numpy as np
-import pandas as pd
-from collections import OrderedDict
 import nltk
 from nltk.util import *
 from nltk.tokenize import *
-from nltk.probability import *
-import scipy
-from scipy import linalg
-from scipy.optimize import curve_fit
 from decimal import *
 getcontext().prec = 25
 
@@ -188,7 +173,7 @@ class KneyserNey():
         N = self.length - self.freq_1gram['<s>']
         e = Decimal(0)
         count = 0
-        for sentence in test_corpus:
+        for sentence in self.test_corpus:
             for i in range(1, len(sentence)):
                 bigCount = self.cfreq_2gram[sentence[i-1]][sentence[i]]
                 smoothed = 0
@@ -209,4 +194,4 @@ class KneyserNey():
                 e += Decimal(math.log(smoothed))
                 count = count +1
         entropy = e / Decimal(count)
-        return pow(Decimal(2.0), entropy)
+        return pow(Decimal(2.0), -entropy)
