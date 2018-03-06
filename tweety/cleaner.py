@@ -115,4 +115,4 @@ class TextCleaning:
 			unspacedhyphens_removed =  self.unspacedhyphens(unspacedpunctuations_removed)	
 			if len(unspacedhyphens_removed.lstrip())>0:
 				final_text = unspacedhyphens_removed.lstrip()
-				return final_text
+				return final_text.lower()
