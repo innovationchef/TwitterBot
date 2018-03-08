@@ -73,7 +73,7 @@ class TextCleaning:
 		hashtags = re.compile(r'#[.\S]+', flags = re.IGNORECASE)
 		brackets = re.compile(r'[\[\(\{](.*?)[\]\)\}]', flags = re.IGNORECASE)
 		numbers = re.compile(r'(\W+)?([0-9]+)(\W+)?')
-		speclchars = re.compile(r'[_~@#\^\*\(\)\+={}\|\[\]<>\\/]')
+		speclchars = re.compile(r'[_~@\^\*\(\)\+={}\|\[\]\\/]')
 		emoticons = re.compile(r"""(:\)) | (=\]) | (=\)) | (:\]) | (-:\)) | #smile
 								 (:\() | (=\[) | (=\() | (:\[) | (-:\() | #sad
 								 (:p) | (:-p) | (=p) | #sticking out
@@ -92,20 +92,19 @@ class TextCleaning:
 								 (O:-\)) | (O:\)) | #angel
 								 (<3) | #heart
 								 (:3) | #disgust
-								 (3:-\)) | (3:\)) |  #devil
-								 """, flags = re.VERBOSE|re.IGNORECASE)
+								 (3:-\)) | (3:\))  #devil""", flags = re.VERBOSE|re.IGNORECASE)
 
 		if nonenglish.search(s) is None:
 			newline_removed = re.sub(newline, ' ', s)
 			replace_sign = re.sub(r'&gt;', '>', newline_removed)
 			replace_sign = re.sub(r'&lt;', '<', replace_sign)
 			weblinks_removed = re.sub(weblinks, '', replace_sign)
-			mentions_removed = re.sub(mentions, '', weblinks_removed)
-			hashtags_removed = re.sub(hashtags, '', mentions_removed)
-			repeats_removed = ''.join(''.join(s)[:2] for _, s in itertools.groupby(hashtags_removed))
-			emoticons_removed = re.sub(emoticons, '', repeats_removed)
-			brackets_removed = re.sub(brackets, '', emoticons_removed)
-			numbers_removed = re.sub(numbers, ' NAMBUR ', brackets_removed)
+			mentions_removed = re.sub(mentions, ' <person> ', weblinks_removed)
+			# hashtags_removed = re.sub(hashtags, ' <hashtag> ', mentions_removed)
+			repeats_removed = ''.join(''.join(s)[:2] for _, s in itertools.groupby(mentions_removed))
+			brackets_removed = re.sub(brackets, '', repeats_removed)
+			emoticons_removed = re.sub(emoticons, '', brackets_removed)
+			numbers_removed = re.sub(numbers, ' <number> ', emoticons_removed)
 			speclchars_removed = re.sub(speclchars, ' ', numbers_removed)
 			tabs_removed = re.sub(tabs, ' ', speclchars_removed)
 			spaces_removed = re.sub(spaces, ' ', tabs_removed)
@@ -115,4 +114,7 @@ class TextCleaning:
 			unspacedhyphens_removed =  self.unspacedhyphens(unspacedpunctuations_removed)	
 			if len(unspacedhyphens_removed.lstrip())>0:
 				final_text = unspacedhyphens_removed.lstrip()
-				return final_text.lower()
+				if final_text.lower()[:3] == "rt ": 
+					return final_text.lower()[3:]
+				else:
+					return final_text.lower()

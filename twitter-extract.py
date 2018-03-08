@@ -102,8 +102,6 @@ parser.add_argument('path_to_raw_directory', help='Path to the extracted directo
 
 parser.add_argument('path_to_db', help='''Location to save extracted data.''')
 
-parser.add_argument('--force-add', action='store_true', help='If true then directory is extracted even if they have already been extracted')
-
 args = parser.parse_args()
 
 if not os.path.exists(args.path_to_raw_directory):
@@ -136,6 +134,7 @@ with sqlite3.connect(db_path) as conn:
                 parsed_user.description, parsed_user.friends_count, parsed_user.notifications, parsed_user.show_all_inline_media, parsed_user.geo_enabled,
                 parsed_user.name, parsed_user.lang, parsed_user.favourites_count, parsed_user.screen_name, parsed_user.created_at,
                 parsed_user.contributors_enabled, parsed_user.verified, parsed_user.protected, parsed_user.is_translator, parsed_user.location))
+            # logger.info(parsed_tweet.text)
             logger.info('Dumped tweet ID %d in Database', parsed_tweet._id)
             i += 1
             
