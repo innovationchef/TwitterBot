@@ -1,0 +1,5 @@
+<schema>
+    <field name="word1" type="string" indexed="true" stored="true" required="true"/>
+    <field name="word2" type="string" indexed="true" stored="true" required="true"/>
+    <field name="occurence" type="pint" indexed="true" stored="true" required="true"/>
+</schema>

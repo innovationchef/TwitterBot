@@ -13,13 +13,15 @@ cd..
 
 3. Create a Solr Core 
 ```
-sudo su - solr -c "/opt/solr/bin/solr create -c twitter"
+sudo su - solr -c "/opt/solr/bin/solr create -c twitter_unigram"
+sudo su - solr -c "/opt/solr/bin/solr create -c twitter_bigram"
+sudo su - solr -c "/opt/solr/bin/solr create -c twitter_trigram"
 ```
 
 4. Setup the core
 ```
 cd setup
- ./setup-solr.py ../conf/solr-setup.xml -s http://localhost:8983/solr/twitter/
+./setup-solr.py
 cd ..
 ```
 
